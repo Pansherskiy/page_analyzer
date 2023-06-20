@@ -6,10 +6,7 @@
 
   {% include 'header.html' %}
 
-  {% for message, category in messages %}
-    <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
-  {% endfor %}
-
+  {% include 'flash.html' %}
 
   <main class="flex-grow-1">
     <div class="container-lg mt-3">

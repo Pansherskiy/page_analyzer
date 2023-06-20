@@ -6,6 +6,8 @@
 
   {% include 'header.html' %}
 
+  {% include 'flash.html' %}
+
   <main class="flex-grow-1">
     <div class="container-lg mt-3">
       <h1>Сайты</h1>
@@ -20,7 +22,13 @@
     </tr>
     </thead>
     <tbody>
-
+    {% for id, name, date in urls %}
+    <tr>
+        <th>{{ id }}</th>
+        <th>{{ name }}</th>
+        <th>{{ date }}</th>
+    </tr>
+    {% endfor %}
     </tbody>
   </table>
   </div>
