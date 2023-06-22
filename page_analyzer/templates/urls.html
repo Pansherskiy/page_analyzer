@@ -11,7 +11,9 @@
   <main class="flex-grow-1">
     <div class="container-lg mt-3">
       <h1>Сайты</h1>
-  <div class="table-responsive">
+
+
+<div class="table-responsive">
   <table class="table table-bordered table-hover text-nowrap" data-test="urls">
     <thead>
     <tr>
@@ -22,13 +24,16 @@
     </tr>
     </thead>
     <tbody>
+    {% if urls %}
     {% for id, name, date in urls %}
     <tr>
-        <th>{{ id }}</th>
-        <th>{{ name }}</th>
-        <th>{{ date }}</th>
+        <td>{{ id }}</td>
+        <td><a href="/urls/{{ id }}">{{ name }}</a></td>
+        <td>{{ date }}</td>
+        <td></td>
     </tr>
     {% endfor %}
+    {% endif %}
     </tbody>
   </table>
   </div>

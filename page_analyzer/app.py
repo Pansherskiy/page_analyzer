@@ -44,9 +44,8 @@ def url_added(id):
     messages = get_flashed_messages()
     data = db_select_query(db_conn,
                            f"SELECT name, created_at FROM urls"
-                           f" WHERE id = {id};")[0]
-    name = data[0]
-    created_at = data[1]
+                           f" WHERE id = {id};")
+    name, created_at = data
     return render_template('url_page.html',
                            id=id,
                            url_name=name,
@@ -65,18 +64,25 @@ def urls_page():
                                urls=urls)
     if request.method == 'POST':
         url = request.form.get('url')
+        urls = db_select_query(db_conn, "SELECT name FROM urls;")
         errors = validate_url(url)
         if errors:
             for error in errors:
                 flash(FLASH_MESSAGES[error])
             return redirect(url_for('index'))
-        db_query(db_conn,
-                 f"INSERT INTO urls(name, created_at) VALUES "
-                 f"('{url}', '{date.today()}');")
-        id = db_select_query(db_conn, f"SELECT id FROM urls "
-                                      f"WHERE name = '{url}'")
-        flash(FLASH_MESSAGES['add_url'])
-        return redirect(url_for('url_added', id=id[0][0]))
+        if urls and url in urls:
+            flash(FLASH_MESSAGES['url_exist'])
+            url_id = db_select_query(db_conn, f"SELECT id FROM urls "
+                                              f"WHERE name = '{url}'")
+            return redirect(url_for('url_added', id=url_id))
+        else:
+            flash(FLASH_MESSAGES['add_url'])
+            db_query(db_conn,
+                     f"INSERT INTO urls(name, created_at) VALUES "
+                     f"('{url}', '{date.today()}');")
+            url_id = db_select_query(db_conn, f"SELECT id FROM urls "
+                                              f"WHERE name = '{url}'")
+            return redirect(url_for('url_added', id=url_id))
 
 
 @app.errorhandler(404)

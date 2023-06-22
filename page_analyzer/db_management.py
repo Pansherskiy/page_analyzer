@@ -33,8 +33,8 @@ def db_select_query(db_conn, query):
     try:
         with db_conn.cursor() as cursor:
             cursor.execute(query)
-            db_conn.commit()
-            return cursor.fetchall()
+            tuples_list = cursor.fetchall()
+            return tuple_normalization(tuples_list)
     except Exception as error:
         print('Error in db_select_query() function!\n', error)
 
@@ -54,3 +54,14 @@ def create_tables(db_conn):
         db_query(db_conn, CREATE_URLS_CHECK_TABLE_QUERY)
     except Exception as error:
         print('Error in create_urls_table() function!\n', error)
+
+
+def tuple_normalization(tup):
+    if len(tup) == 1 and len(tup[0]) == 1:
+        return tup[0][0]
+    elif len(tup[0]) == 1:
+        return [elem[0] for elem in tup]
+    elif len(tup) == 1:
+        return [elem for elem in tup[0]]
+    else:
+        return tup
