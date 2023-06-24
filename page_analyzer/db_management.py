@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS url_checks(
   status_code INT,
   h1 VARCHAR(255),
   title VARCHAR(255),
-  description VARCHAR(255),
+  description TEXT,
   created_at DATE NOT NULL
 );"""
 
@@ -34,6 +34,7 @@ def db_select_query(db_conn, query):
         with db_conn.cursor() as cursor:
             cursor.execute(query)
             tuples_list = cursor.fetchall()
+            db_conn.commit()
             return tuple_normalization(tuples_list)
     except Exception as error:
         print('Error in db_select_query() function!\n', error)
@@ -61,7 +62,5 @@ def tuple_normalization(tup):
         return tup[0][0]
     elif len(tup[0]) == 1:
         return [elem[0] for elem in tup]
-    elif len(tup) == 1:
-        return [elem for elem in tup[0]]
     else:
         return tup

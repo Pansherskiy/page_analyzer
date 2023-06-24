@@ -25,12 +25,12 @@
     </thead>
     <tbody>
     {% if urls %}
-    {% for id, name, date in urls %}
+    {% for id, name, date, status in urls %}
     <tr>
         <td>{{ id }}</td>
         <td><a href="/urls/{{ id }}">{{ name }}</a></td>
         <td>{{ date }}</td>
-        <td></td>
+        <td>{{ status }}</td>
     </tr>
     {% endfor %}
     {% endif %}
