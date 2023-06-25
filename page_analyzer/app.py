@@ -78,9 +78,8 @@ JOIN (
 ) AS latest_check
 ON urls.id = latest_check.url_id
 JOIN url_checks
-ON url_checks.url_id = latest_check.url_id AND url_checks.created_at = latest_check.max_created_at
-GROUP BY urls.id, urls.name, url_checks.created_at, url_checks.status_code;
-""")
+ON url_checks.url_id = latest_check.url_id
+AND url_checks.created_at = latest_check.max_created_at ORDER BY urls.id;""")
         messages = get_flashed_messages()
         return render_template('urls.html',
                                messages=messages,
