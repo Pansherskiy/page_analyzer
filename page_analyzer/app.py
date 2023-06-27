@@ -55,7 +55,8 @@ def url_added(id):
                                  f"url_checks.title, url_checks.description, "
                                  f"url_checks.created_at FROM urls JOIN "
                                  f"url_checks ON urls.id = url_checks.url_id "
-                                 f"WHERE urls.id = '{id}';")
+                                 f"WHERE urls.id = '{id}'"
+                                 f"ORDER BY id DESC;")
     return render_template('url_page.html',
                            id=id,
                            url_name=name,
@@ -69,17 +70,14 @@ def url_added(id):
 def urls_page():
     if request.method == 'GET':
         urls = db_select_query(db_conn, """
-        SELECT urls.id, urls.name, url_checks.created_at, url_checks.status_code
-FROM urls
-JOIN (
-  SELECT url_id, MAX(created_at) AS max_created_at
-  FROM url_checks
-  GROUP BY url_id
-) AS latest_check
-ON urls.id = latest_check.url_id
-JOIN url_checks
-ON url_checks.url_id = latest_check.url_id
-AND url_checks.created_at = latest_check.max_created_at ORDER BY urls.id;""")
+        SELECT DISTINCT ON (urls.id)
+                urls.id,
+                urls.name,
+                url_checks.created_at,
+                url_checks.status_code
+            FROM urls LEFT JOIN url_checks
+            ON urls.id = url_checks.url_id
+            ORDER BY urls.id DESC, url_checks.created_at DESC""")
         messages = get_flashed_messages()
         return render_template('urls.html',
                                messages=messages,
@@ -87,7 +85,6 @@ AND url_checks.created_at = latest_check.max_created_at ORDER BY urls.id;""")
     if request.method == 'POST':
         url = request.form.get('url')
         urls = db_select_query(db_conn, "SELECT name FROM urls;")
-        print(urls)
         errors = validate_url(url)
         if errors:
             for error in errors:

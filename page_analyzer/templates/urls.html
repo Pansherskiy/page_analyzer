@@ -29,8 +29,13 @@
     <tr>
         <td>{{ id }}</td>
         <td><a href="/urls/{{ id }}">{{ name }}</a></td>
+        {% if date and status %}
         <td>{{ date }}</td>
         <td>{{ status }}</td>
+        {% else %}
+        <td></td>
+        <td></td>
+        {% endif %}
     </tr>
     {% endfor %}
     {% endif %}
