@@ -1,7 +1,7 @@
 from datetime import date
 from page_analyzer.setting import SECRET_KEY
 from page_analyzer.url_validator import validate_url
-from page_analyzer.parser import parse_url
+from page_analyzer.parser import parse_url, normalize_url
 from page_analyzer.db_management import (
     create_tables,
     db_connect,
@@ -84,38 +84,38 @@ def urls_page():
                                urls=urls)
     if request.method == 'POST':
         url = request.form.get('url')
-        urls = db_select_query(db_conn, "SELECT name FROM urls;")
         errors = validate_url(url)
+        normal_url = normalize_url(url)
+        urls = db_select_query(db_conn, "SELECT name FROM urls;")
         if errors:
             for error in errors:
                 flash(FLASH_MESSAGES[error])
             return redirect(url_for('index'))
-        if urls and url in urls:
+        if urls and normal_url in urls:
             flash(FLASH_MESSAGES['url_exist'])
             url_id = db_select_query(db_conn, f"SELECT id FROM urls "
-                                              f"WHERE name = '{url}'")
+                                              f"WHERE name = '{normal_url}'")
             return redirect(url_for('url_added', id=url_id))
         else:
             flash(FLASH_MESSAGES['add_url'])
             db_query(db_conn,
                      f"INSERT INTO urls(name, created_at) VALUES "
-                     f"('{url}', '{date.today()}');")
+                     f"('{normal_url}', '{date.today()}');")
             url_id = db_select_query(db_conn, f"SELECT id FROM urls "
-                                              f"WHERE name = '{url}'")
+                                              f"WHERE name = '{normal_url}'")
             return redirect(url_for('url_added', id=url_id))
 
 
 @app.post('/urls/<id>/check')
 def url_check(id):
     url = db_select_query(db_conn, f"SELECT name FROM urls WHERE id = '{id}'")
-    if parse_url(url):
-        response, h1, title, description = parse_url(url)
-        if response == 200:
-            db_query(db_conn, f"INSERT INTO url_checks (url_id, status_code, "
-                              f"h1, title, description, created_at) VALUES "
-                              f"('{id}', '{response}', '{h1}', '{title}', "
-                              f"'{description}', '{date.today()}');")
-            flash(FLASH_MESSAGES['url_checked'])
+    response, h1, title, description = parse_url(url)
+    if response == 200:
+        db_query(db_conn, f"INSERT INTO url_checks (url_id, status_code, "
+                          f"h1, title, description, created_at) VALUES "
+                          f"('{id}', '{response}', '{h1}', '{title}', "
+                          f"'{description}', '{date.today()}');")
+        flash(FLASH_MESSAGES['url_checked'])
     else:
         flash(FLASH_MESSAGES['url_check_error'])
     return redirect(url_for('url_added', id=id))
