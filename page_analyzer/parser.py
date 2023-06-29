@@ -1,10 +1,19 @@
 import requests
+from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+
+
+def normalize_url(url):
+    scheme = urlparse(url).scheme
+    netloc = urlparse(url).netloc
+    normal_url = f'{scheme}://{netloc}'
+    return normal_url
 
 
 def parse_url(url):
     try:
-        html_content = requests.get(url)
+        normal_url = normalize_url(url)
+        html_content = requests.get(normal_url)
     except requests.exceptions.ConnectionError:
         return None
     response = html_content.status_code
