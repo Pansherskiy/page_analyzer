@@ -15,7 +15,6 @@ from flask import (
     request,
     redirect,
     url_for,
-    get_flashed_messages
 )
 
 
@@ -38,13 +37,11 @@ create_tables(db_conn)
 
 @app.route('/')
 def index():
-    messages = get_flashed_messages()
-    return render_template('index.html', messages=messages)
+    return render_template('index.html')
 
 
 @app.route('/urls/<id>')
 def url_added(id):
-    messages = get_flashed_messages()
     url_data = db_select_query(db_conn,
                                f"SELECT name, created_at FROM urls"
                                f" WHERE id = {id};")
@@ -61,7 +58,6 @@ def url_added(id):
                            id=id,
                            url_name=name,
                            created_at=created_at,
-                           messages=messages,
                            checks=check_data
                            )
 
@@ -78,10 +74,7 @@ def urls_page():
             FROM urls LEFT JOIN url_checks
             ON urls.id = url_checks.url_id
             ORDER BY urls.id DESC, url_checks.created_at DESC""")
-        messages = get_flashed_messages()
-        return render_template('urls.html',
-                               messages=messages,
-                               urls=urls)
+        return render_template('urls.html', urls=urls)
     if request.method == 'POST':
         url = request.form.get('url')
         errors = validate_url(url)
@@ -90,7 +83,7 @@ def urls_page():
         if errors:
             for error in errors:
                 flash(FLASH_MESSAGES[error])
-            return redirect(url_for('index'))
+            return render_template('index.html'), 422
         if urls and normal_url in urls:
             flash(FLASH_MESSAGES['url_exist'])
             url_id = db_select_query(db_conn, f"SELECT id FROM urls "
